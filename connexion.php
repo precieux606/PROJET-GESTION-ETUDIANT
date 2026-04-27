@@ -1,12 +1,11 @@
 <?php
 $host = 'localhost';
-$db   = 'gestion-etudiant'; // Vérifie bien que c'est le nom exact dans phpMyAdmin
+$db   = 'gestion-etudiant'; 
 $user = 'root';
 $pass = ''; 
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8", $user, $pass);
-    // On active les erreurs SQL pour les voir en cas de problème
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 } catch (PDOException $e) {
     die("Erreur de connexion : " . $e->getMessage());
