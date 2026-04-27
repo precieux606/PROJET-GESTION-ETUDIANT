@@ -1,35 +1,71 @@
-<?php 
+<?php
 include 'connexion.php';
-$stmt = $pdo->prepare("SELECT * FROM etudiants WHERE id = ?");
-$stmt->execute([$_GET['id']]);
-$e = $stmt->fetch();
+
+if (isset($_GET['id'])) {
+    $id = $_GET['id'];
+    $req = $pdo->prepare("SELECT * FROM etudiants WHERE id = ?");
+    $req->execute([$id]);
+    $etudiant = $req->fetch();
+
+    if (!$etudiant) {
+        die("Étudiant introuvable.");
+    }
+}
+
+if (isset($_POST['modifier'])) {
+    $id_etudiant = $_POST['id_etudiant'];
+    $nom = $_POST['nom'];
+    $prenom = $_POST['prenom'];
+    $filiere_id = $_POST['filiere_id'];
+
+    $sql = "UPDATE etudiants SET nom = ?, prenom = ?, filiere_id = ? WHERE id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([$nom, $prenom, $filiere_id, $id_etudiant]);
+
+    header("Location: index.php");
+    exit();
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="assets/css/style.css">
     <title>Modifier Étudiant</title>
+    <link rel="stylesheet" href="Assets/style.css">
 </head>
 <body>
+
 <div class="container">
-    <h2>Modifier Étudiant</h2>
-    <form id="studentForm" action="traitement.php" method="POST">
-        <input type="hidden" name="id" value="<?= $e['id'] ?>">
-        <input type="text" name="nom" id="nom" value="<?= $e['nom'] ?>">
-        <input type="text" name="prenom" id="prenom" value="<?= $e['prenom'] ?>">
-        <select name="filiere_id">
+    <h1>Modifier les informations</h1>
+
+    <form method="POST">
+        <input type="hidden" name="id_etudiant" value="<?php echo $etudiant['id']; ?>">
+
+        <label>Nom</label>
+        <input type="text" name="nom" value="<?php echo htmlspecialchars($etudiant['nom']); ?>" required>
+
+        <label>Prénom</label>
+        <input type="text" name="prenom" value="<?php echo htmlspecialchars($etudiant['prenom']); ?>" required>
+
+        <label>Filière</label>
+        <select name="filiere_id" required>
             <?php
-            $q = $pdo->query("SELECT * FROM filieres");
-            while ($f = $q->fetch()) {
-                $sel = ($f['id'] == $e['filiere_id']) ? "selected" : "";
-                echo "<option value='{$f['id']}' $sel>{$f['nom']}</option>";
+            $res = $pdo->query("SELECT * FROM filieres");
+            while ($f = $res->fetch()) {
+                $selected = ($f['id'] == $etudiant['filiere_id']) ? "selected" : "";
+                echo "<option value='".$f['id']."' $selected>".$f['nom']."</option>";
             }
             ?>
         </select>
-        <button type="submit" name="modifier">Mettre à jour</button>
+
+        <button type="submit" name="modifier">Enregistrer les modifications</button>
+        <br><br>
+        <a href="index.php" style="text-align:center; display:block; color:#666;">Annuler</a>
     </form>
 </div>
-<script src="assets/js/script.js"></script>
+
+<script src="Assets/script.js"></script>
+
 </body>
 </html>
